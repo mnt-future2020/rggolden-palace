@@ -250,18 +250,15 @@ export const Logo = ({ hotelData }) => {
       href={`/dashboard`}
       className="logo-container h-16 flex items-center px-4 transition-all duration-300"
     >
-      <div className="logo-wrapper relative w-[160px] h-16">
-        {/* Fixed height container with flexible width */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Image
-            src={logoUrl}
-            alt="Hotel Logo"
-            width={200}
-            height={200}
-            className="w-auto h-full max-w-full object-cover"
-            priority
-          />
-        </div>
+      <div className="logo-wrapper relative w-[160px] h-16 flex items-center justify-center">
+        <Image
+          src={logoUrl}
+          alt="Hotel Logo"
+          width={160}
+          height={64}
+          className="w-auto h-auto max-w-[160px] max-h-16 object-contain"
+          priority
+        />
       </div>
     </Link>
   );

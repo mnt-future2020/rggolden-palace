@@ -188,9 +188,12 @@ export default function QuoteRequest() {
           paymentSettings.upiQrCode && (
             <div className="flex justify-center">
               <div className="bg-white p-4 rounded-[2rem] shadow-2xl ring-8 ring-white/5">
-                <img
+                <Image
                   src={paymentSettings.upiQrCode}
                   alt="QR"
+                  width={176}
+                  height={176}
+                  sizes="(max-width: 640px) 160px, 176px"
                   className="w-40 h-40 sm:w-44 sm:h-44 object-contain"
                 />
               </div>

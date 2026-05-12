@@ -2,8 +2,11 @@ import { NextResponse } from "next/server";
 import Room from "../../../../utils/model/room/roomSchema";
 import { getHotelDatabase } from "../../../../utils/config/hotelConnection";
 import { getModel } from "../../../../utils/helpers/getModel";
-import fs from "fs/promises";
-import path from "path";
+import {
+  uploadToCloudinary,
+  deleteFromCloudinary,
+  getPublicIdFromUrl,
+} from "../../../../utils/helpers/cloudinary";
 
 export async function GET(request, { params }) {
   const { roomId } = params;
@@ -96,12 +99,11 @@ export async function PUT(request, { params }) {
       if (formData.has("numberOfRooms"))
         updateData.numberOfRooms = parseInt(formData.get("numberOfRooms"));
 
-      // Handle room numbers update (existing code)
+      // Handle room numbers update
       if (formData.has("roomNumbers")) {
         const numberOfRooms = parseInt(formData.get("numberOfRooms"));
         const newRoomNumbers = JSON.parse(formData.get("roomNumbers"));
 
-        // Get existing room to preserve booking data
         const existingRoom = await RoomModel.findById(roomId);
         if (!existingRoom) {
           return NextResponse.json(
@@ -110,7 +112,6 @@ export async function PUT(request, { params }) {
           );
         }
 
-        // Create a map of existing room numbers to their booking data
         const existingBookingsMap = new Map(
           existingRoom.roomNumbers.map((room) => [
             room.number,
@@ -118,7 +119,6 @@ export async function PUT(request, { params }) {
           ])
         );
 
-        // Merge existing booking data with new room numbers
         updateData.roomNumbers = newRoomNumbers.map((room) => ({
           number: room.number,
           bookeddates: existingBookingsMap.get(room.number) || [],
@@ -130,7 +130,6 @@ export async function PUT(request, { params }) {
 
     // Update complementary foods handling
     updateData.complementaryFoods = formData.getAll("complementaryFoods");
-    // Handle the case when no complementary foods are selected
     if (!formData.has("complementaryFoods")) {
       updateData.complementaryFoods = [];
     }
@@ -142,90 +141,31 @@ export async function PUT(request, { params }) {
       });
     }
 
-    // Add sanitizeFileName function
-    const sanitizeFileName = (originalFileName) => {
-      // Split the filename into name and extension
-      const [name, extension] = originalFileName.split(/\.(?=[^.]+$)/);
-      // Remove all spaces from the name
-      const sanitizedName = name.replace(/\s+/g, "");
-      return `${sanitizedName}.${extension}`;
-    };
-
+    // Handle main image upload to Cloudinary
     const mainImageFile = formData.get("mainImage");
-    const thumbnailFiles = formData.getAll("thumbnailImages");
-
     let mainImageUrl = null;
     if (mainImageFile && mainImageFile.name) {
-      const sanitizedMainImageName = sanitizeFileName(mainImageFile.name);
-      const mainImagePath = path.join(
-        process.cwd(),
-        "public",
-        "assets",
-        "images",
-        "rooms",
-        "mainimage",
-        sanitizedMainImageName
-      );
-      const uploadsDir = path.join(
-        process.cwd(),
-        "public",
-        "assets",
-        "images",
-        "rooms",
-        "mainimage"
-      );
-
-      try {
-        await fs.access(uploadsDir);
-      } catch (error) {
-        if (error.code === "ENOENT") {
-          await fs.mkdir(uploadsDir, { recursive: true });
-        } else {
-          throw error;
-        }
-      }
-
-      await fs.writeFile(
-        mainImagePath,
-        Buffer.from(await mainImageFile.arrayBuffer())
-      );
-      mainImageUrl = `/assets/images/rooms/mainimage/${sanitizedMainImageName}`;
+      const buffer = Buffer.from(await mainImageFile.arrayBuffer());
+      const { url } = await uploadToCloudinary(buffer, {
+        folder: "wedding-mahaal/rooms/mainimage",
+        fileName: mainImageFile.name,
+      });
+      mainImageUrl = url;
     }
 
     if (mainImageUrl) updateData.mainImage = mainImageUrl;
 
+    // Handle thumbnail images upload to Cloudinary
+    const thumbnailFiles = formData.getAll("thumbnailImages");
     const thumbnailImageUrls = [];
     for (const thumbnailFile of thumbnailFiles) {
       if (!thumbnailFile.name) continue;
-      const sanitizedThumbnailName = sanitizeFileName(thumbnailFile.name);
-      const thumbnailPath = path.join(
-        process.cwd(),
-        "public",
-        "assets",
-        "images",
-        "rooms",
-        "thumbnailimages",
-        sanitizedThumbnailName
-      );
-      const thumbnailDir = path.dirname(thumbnailPath);
-
-      try {
-        await fs.access(thumbnailDir);
-      } catch (error) {
-        if (error.code === "ENOENT") {
-          await fs.mkdir(thumbnailDir, { recursive: true });
-        } else {
-          throw error;
-        }
-      }
-
-      await fs.writeFile(
-        thumbnailPath,
-        Buffer.from(await thumbnailFile.arrayBuffer())
-      );
-      thumbnailImageUrls.push(
-        `/assets/images/rooms/thumbnailimages/${sanitizedThumbnailName}`
-      );
+      const buffer = Buffer.from(await thumbnailFile.arrayBuffer());
+      const { url } = await uploadToCloudinary(buffer, {
+        folder: "wedding-mahaal/rooms/thumbnailimages",
+        fileName: thumbnailFile.name,
+      });
+      thumbnailImageUrls.push(url);
     }
 
     if (thumbnailImageUrls.length > 0)
@@ -254,14 +194,12 @@ export async function PUT(request, { params }) {
       );
 
       if (numberIndex !== -1) {
-        // Remove the specific booking from bookeddates array
         numbersArray[numberIndex].bookeddates = numbersArray[
           numberIndex
         ].bookeddates.filter(
           (booking) => booking.bookingNumber !== bookingNumber
         );
 
-        // Update the appropriate array based on type
         const updateField = isHall ? "hallNumbers" : "roomNumbers";
         const updateResult = await RoomModel.findByIdAndUpdate(
           roomId,
@@ -349,33 +287,31 @@ export async function DELETE(request, { params }) {
       );
     }
 
-    // Delete image files and room record
+    // Delete main image from Cloudinary
     if (roomToDelete.mainImage) {
-      const mainImagePath = path.join(
-        process.cwd(),
-        "public",
-        roomToDelete.mainImage
-      );
-      await fs
-        .unlink(mainImagePath)
-        .catch((err) => console.error("Error deleting main image:", err));
+      const publicId = getPublicIdFromUrl(roomToDelete.mainImage);
+      if (publicId) {
+        await deleteFromCloudinary(publicId).catch((err) =>
+          console.error("Error deleting main image from Cloudinary:", err)
+        );
+      }
     }
 
+    // Delete thumbnail images from Cloudinary
     if (
       roomToDelete.thumbnailImages &&
       roomToDelete.thumbnailImages.length > 0
     ) {
-      for (const thumbnailImage of roomToDelete.thumbnailImages) {
-        const thumbnailPath = path.join(
-          process.cwd(),
-          "public",
-          thumbnailImage
-        );
-        await fs
-          .unlink(thumbnailPath)
-          .catch((err) =>
-            console.error("Error deleting thumbnail image:", err)
+      for (const thumbnailUrl of roomToDelete.thumbnailImages) {
+        const publicId = getPublicIdFromUrl(thumbnailUrl);
+        if (publicId) {
+          await deleteFromCloudinary(publicId).catch((err) =>
+            console.error(
+              "Error deleting thumbnail image from Cloudinary:",
+              err
+            )
           );
+        }
       }
     }
 

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getHotelDatabase } from "../../../utils/config/hotelConnection";
 import { getModel } from "../../../utils/helpers/getModel";
 import Crm from "../../../utils/model/Crm/CrmSchema";
+import { uploadToCloudinary } from "../../../utils/helpers/cloudinary";
 
 export const dynamic = "force-dynamic";
 
@@ -37,9 +38,6 @@ export async function GET(request) {
     );
   }
 }
-
-import fs from "fs";
-import path from "path";
 
 export async function POST(request) {
   try {
@@ -80,26 +78,12 @@ export async function POST(request) {
 
       const receiptFile = formData.get("paymentReceipt");
       if (receiptFile && receiptFile.size > 0) {
-        const timestamp = Date.now();
-        const originalName = receiptFile.name;
-        const [name, extension] = originalName.split(/\.(?=[^.]+$)/);
-        const sanitizedName = name.replace(/\s+/g, "");
-        const fileName = `${timestamp}-${sanitizedName}.${extension}`;
-        const uploadDir = path.join(
-          process.cwd(),
-          "public",
-          "assets",
-          "images",
-          "receipts",
-        );
-        if (!fs.existsSync(uploadDir))
-          fs.mkdirSync(uploadDir, { recursive: true });
-        const filePath = path.join(uploadDir, fileName);
-        await fs.promises.writeFile(
-          filePath,
-          Buffer.from(await receiptFile.arrayBuffer()),
-        );
-        finalReceiptPath = `/assets/images/receipts/${fileName}`;
+        const buffer = Buffer.from(await receiptFile.arrayBuffer());
+        const { url } = await uploadToCloudinary(buffer, {
+          folder: "wedding-mahaal/receipts",
+          fileName: receiptFile.name,
+        });
+        finalReceiptPath = url;
       }
     } else {
       const body = await request.json();

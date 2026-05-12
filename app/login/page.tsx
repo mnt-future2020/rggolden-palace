@@ -260,14 +260,14 @@ export default function Login() {
           <div className="mx-auto max-w-sm">
             {hotelLogo && (
               <div className="mb-4 -mt-4 flex justify-center transition-transform duration-300 hover:scale-105">
-                <div className="relative w-20 h-20 md:w-28 md:h-28">
-                  <Image                    
+                <div className="relative w-24 h-24 md:w-32 md:h-32">
+                  <Image
                     src={hotelLogo}
                     alt="Mahal Logo"
                     fill
-                    sizes="(max-width: 768px) 80px, 96px"
+                    sizes="(max-width: 768px) 96px, 128px"
                     priority
-                    className="object-cover drop-shadow-xl opacity-90"
+                    className="object-contain drop-shadow-xl"
                   />
                 </div>
               </div>

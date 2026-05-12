@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { motion, AnimatePresence } from 'framer-motion';
 import { IoClose } from "react-icons/io5";
 import { IoChevronBackSharp, IoChevronForwardSharp } from "react-icons/io5";
@@ -40,10 +41,12 @@ export default function GalleryView({ images, isOpen, onClose, currentIndex, set
                 exit={{ opacity: 0 }}
                 className="absolute inset-0"
               >
-                <img
+                <Image
                   src={images[currentIndex]?.src || ''}
                   alt={images[currentIndex]?.alt || ''}
-                  className="w-full h-full object-contain"
+                  fill
+                  sizes="100vw"
+                  className="object-contain"
                 />
               </motion.div>
             </AnimatePresence>

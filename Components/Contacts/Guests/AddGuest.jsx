@@ -93,38 +93,49 @@ export default function AddGuest({ guestId }) {
     setIsSubmitting(true);
 
     try {
-      const formDataToSend = new FormData();
-      const dataToUpdate = {
-        ...formData,
-        name: `${formData.firstName} ${formData.lastName}`,
-        mobileNo: formData.countryCode + formData.mobileNo,
-      };
+      const newFiles = uploadedFiles.filter((fileObj) => !fileObj.isExisting);
 
-      Object.entries(dataToUpdate).forEach(([key, value]) => {
-        formDataToSend.append(key, value);
-      });
+      let response;
 
-      uploadedFiles
-        .filter((fileObj) => !fileObj.isExisting)
-        .forEach((fileObj) => {
-          formDataToSend.append("files", fileObj.file);
+      if (isEditMode) {
+        // Step 1: Update text fields via JSON
+        const dataToUpdate = {
+          ...formData,
+          name: `${formData.firstName} ${formData.lastName}`,
+          mobileNo: formData.countryCode + formData.mobileNo,
+        };
+        response = await axios.put(`/api/guests/${guestId}`, dataToUpdate, {
+          headers: { "Content-Type": "application/json" },
         });
 
-      const url = isEditMode
-        ? `/api/guests/${guestId}`
-        : "/api/guests/add-guest";
-      const method = isEditMode ? "PUT" : "POST";
-
-      const response = await axios({
-        method,
-        url,
-        data: isEditMode ? dataToUpdate : formDataToSend,
-        headers: {
-          "Content-Type": isEditMode
-            ? "application/json"
-            : "multipart/form-data",
-        },
-      });
+        // Step 2: Upload new files via FormData (if any)
+        if (newFiles.length > 0) {
+          const fileFormData = new FormData();
+          newFiles.forEach((fileObj) => {
+            fileFormData.append("files", fileObj.file);
+          });
+          await axios.put(`/api/guests/${guestId}`, fileFormData, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
+        }
+      } else {
+        // Create: send everything as FormData
+        const formDataToSend = new FormData();
+        const dataFields = {
+          ...formData,
+          name: `${formData.firstName} ${formData.lastName}`,
+          mobileNo: formData.countryCode + formData.mobileNo,
+        };
+        Object.entries(dataFields).forEach(([key, value]) => {
+          formDataToSend.append(key, value);
+        });
+        newFiles.forEach((fileObj) => {
+          formDataToSend.append("files", fileObj.file);
+        });
+        response = await axios.post("/api/guests/add-guest", formDataToSend, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+      }
 
       if (response.data.success) {
         toast.success(response.data.message || "Guest saved successfully");

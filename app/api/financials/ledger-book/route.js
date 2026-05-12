@@ -5,6 +5,8 @@ import LedgerSchema from "../../../../utils/model/financials/ledger/ledgerSchema
 import BankSchema from "../../../../utils/model/financials/bank/bankSchema";
 import BankEntrySchema from "../../../../utils/model/financials/bank/bankEntrySchema";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request) {
   try {
     await getHotelDatabase();

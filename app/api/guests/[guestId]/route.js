@@ -2,13 +2,12 @@ import { NextResponse } from "next/server";
 import { getHotelDatabase } from "../../../../utils/config/hotelConnection";
 import GuestInfo from "../../../../utils/model/contacts/guestInfoListSchema";
 import { getModel } from "../../../../utils/helpers/getModel";
-import { writeFile, mkdir, unlink } from "fs/promises";
-import path from "path";
+import {
+  uploadToCloudinary,
+  deleteFromCloudinary,
+  getPublicIdFromUrl,
+} from "../../../../utils/helpers/cloudinary";
 
-const UPLOAD_DIR = path.join(
-  process.cwd(),
-  "public/assets/images/guestinfoList"
-);
 const ALLOWED_FILE_TYPES = [
   "image/jpeg",
   "image/png",
@@ -100,21 +99,19 @@ export async function PUT(request, { params }) {
         }
       }
 
-      // Ensure upload directory exists
-      await mkdir(UPLOAD_DIR, { recursive: true });
-
-      // Process files
+      // Upload files to Cloudinary
       const uploadedFiles = [];
       for (const file of files) {
         const buffer = Buffer.from(await file.arrayBuffer());
-        const fileName = `${Date.now()}-${file.name}`;
-        const filePath = path.join(UPLOAD_DIR, fileName);
+        const { url } = await uploadToCloudinary(buffer, {
+          folder: "wedding-mahaal/guests",
+          fileName: file.name,
+        });
 
-        await writeFile(filePath, buffer);
         uploadedFiles.push({
-          fileName,
+          fileName: file.name,
           fileType: file.type,
-          fileUrl: filePath,
+          fileUrl: url,
           uploadDate: new Date(),
         });
       }
@@ -216,23 +213,25 @@ export async function DELETE(request, { params }) {
     }
 
     // Check if file exists in guest's uploadedFiles
-    const fileExists = guest.uploadedFiles.some(
+    const fileRecord = guest.uploadedFiles.find(
       (file) => file.fileName === fileName
     );
-    if (!fileExists) {
+    if (!fileRecord) {
       return NextResponse.json(
         { success: false, error: "File not found in guest records" },
         { status: 404 }
       );
     }
 
-    // Remove file from filesystem
-    const filePath = path.join(UPLOAD_DIR, fileName);
-    try {
-      await unlink(filePath);
-    } catch (error) {
-      console.error("Error deleting file from filesystem:", error);
-      // Continue with database update even if file deletion fails
+    // Delete from Cloudinary
+    const publicId = getPublicIdFromUrl(fileRecord.fileUrl);
+    if (publicId) {
+      try {
+        await deleteFromCloudinary(publicId);
+      } catch (error) {
+        console.error("Error deleting file from Cloudinary:", error);
+        // Continue with database update even if Cloudinary deletion fails
+      }
     }
 
     // Remove file from database

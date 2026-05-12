@@ -4,11 +4,14 @@ import Guest from "../../../../utils/model/booking/bookingSchema";
 import { getHotelDatabase } from "../../../../utils/config/hotelConnection";
 import { getModel } from "../../../../utils/helpers/getModel";
 import { updateComplementaryInventory } from "../../../../utils/helpers/inventoryHelpers";
-import fs from "fs/promises";
-import path from "path";
 import { sendBookingCancellationEmail } from "../../../../lib/bookingMail";
 import Room from "../../../../utils/model/room/roomSchema";
 import RoomAvailability from "../../../../utils/model/room/roomAvailabilitySchema";
+import {
+  uploadToCloudinary,
+  deleteFromCloudinary,
+  getPublicIdFromUrl,
+} from "../../../../utils/helpers/cloudinary";
 
 export async function GET(request, { params }) {
   const { bookingNumber } = params;
@@ -263,7 +266,7 @@ export async function PUT(request, { params }) {
       updatedData.verificationId = formData.get("verificationId");
     }
 
-    // Handle new file uploads
+    // Handle new file uploads via Cloudinary
     const newFiles = formData.getAll("newFiles");
     if (newFiles.length > 0) {
       updatedData.uploadedFiles = updatedData.uploadedFiles || [];
@@ -271,7 +274,7 @@ export async function PUT(request, { params }) {
       for (const file of newFiles) {
         if (!file.name) continue;
 
-        // Existing file validation code
+        // File validation
         const allowedTypes = ["image/jpeg", "image/png", "application/pdf"];
         const maxSize = 5 * 1024 * 1024; // 5MB
 
@@ -283,24 +286,16 @@ export async function PUT(request, { params }) {
           throw new Error(`File size exceeds 5MB limit`);
         }
 
-        // Save new file
-        const uploadsDir = path.join(
-          process.cwd(),
-          "public",
-          "assets",
-          "images",
-          "bookings",
-          "guest_files"
-        );
-        await fs.mkdir(uploadsDir, { recursive: true });
+        // Upload to Cloudinary
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const { url } = await uploadToCloudinary(buffer, {
+          folder: "wedding-mahaal/bookings/guest_files",
+          fileName: file.name,
+        });
 
-        const filePath = path.join(uploadsDir, file.name);
-        await fs.writeFile(filePath, Buffer.from(await file.arrayBuffer()));
-
-        // Add new file to uploadedFiles array
         updatedData.uploadedFiles.push({
           fileName: file.name,
-          filePath: `/assets/images/bookings/guest_files/${file.name}`,
+          filePath: url,
           uploadDate: new Date(),
         });
       }
@@ -365,15 +360,17 @@ export async function DELETE(request, { params }) {
       );
     }
 
-    // Delete associated files
+    // Delete associated files from Cloudinary
     if (booking.uploadedFiles && booking.uploadedFiles.length > 0) {
       for (const file of booking.uploadedFiles) {
-        const filePath = path.join(process.cwd(), "public", file.filePath);
-        try {
-          await fs.unlink(filePath);
-          console.log(`Deleted file: ${filePath}`);
-        } catch (error) {
-          console.error(`Error deleting file ${filePath}:`, error);
+        const publicId = getPublicIdFromUrl(file.filePath);
+        if (publicId) {
+          try {
+            await deleteFromCloudinary(publicId);
+            console.log(`Deleted file from Cloudinary: ${publicId}`);
+          } catch (error) {
+            console.error(`Error deleting file from Cloudinary:`, error);
+          }
         }
       }
     }

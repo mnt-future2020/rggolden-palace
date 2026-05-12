@@ -1,3 +1,4 @@
+import Image from "next/image";
 import React, { useEffect, useState } from 'react';
 import { FiTrash2, FiEdit } from 'react-icons/fi';
 import axios from 'axios';
@@ -52,15 +53,15 @@ const GeneralTable = ({ onEdit }) => {
   };
 
   const ImageComponent = ({ src, alt }) => (
-    <img
-      src={src}
-      alt={alt}
-      className="h-16 w-24 object-cover rounded"
-      onError={(e) => {
-        toast.error('Failed to load image');
-      }}
-      loading="lazy"
-    />
+    <div className="relative h-16 w-24">
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        sizes="96px"
+        className="object-cover rounded"
+      />
+    </div>
   );
 
   return (

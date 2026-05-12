@@ -3,6 +3,8 @@ import { getHotelDatabase } from "../../../../utils/config/hotelConnection";
 import { getModel } from "../../../../utils/helpers/getModel";
 import BankSchema from "../../../../utils/model/financials/bank/bankSchema";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request) {
   try {
     await getHotelDatabase();

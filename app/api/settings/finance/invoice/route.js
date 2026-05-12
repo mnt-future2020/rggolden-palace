@@ -3,8 +3,11 @@ import { getHotelDatabase } from "../../../../../utils/config/hotelConnection";
 import FinanceSettings from "../../../../../utils/model/settings/finance/invoice/invoiceSettingsSchema";
 import { updateFinancialYearIfExpired } from "../../../../../utils/config/updateFinancialYearIfExpired";
 import { getModel } from "../../../../../utils/helpers/getModel";
-import fs from "fs";
-import path from "path";
+import {
+  uploadToCloudinary,
+  deleteFromCloudinary,
+  getPublicIdFromUrl,
+} from "../../../../../utils/helpers/cloudinary";
 
 export async function GET() {
   try {
@@ -103,45 +106,30 @@ export async function POST(request) {
     // Handle logo upload
     let existingSettings = await FinanceSettingsModel.findOne({});
     let logoData = existingSettings?.logo || {};
-    
-    // Delete old logo if exists
+
+    // Delete old logo from Cloudinary if exists
     if (existingSettings?.logo?.url) {
-      const oldPath = path.join(
-        process.cwd(),
-        "public",
-        existingSettings.logo.url
-      );
-      if (fs.existsSync(oldPath)) {
-        fs.unlinkSync(oldPath);
+      const publicId = getPublicIdFromUrl(existingSettings.logo.url);
+      if (publicId) {
+        await deleteFromCloudinary(publicId).catch((err) =>
+          console.error("Error deleting old logo from Cloudinary:", err)
+        );
       }
     }
 
-    // Create directory if it doesn't exist
-    const uploadsDir = path.join(
-      process.cwd(),
-      "public",
-      "assets",
-      "images",
-      "finance",
-      "logos"
-    );
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
-    }
-
-    // Save new logo
+    // Upload new logo to Cloudinary
     const logoFile = formData.get("logo");
     if (logoFile && logoFile instanceof Blob) {
       try {
-        const logoPath = path.join(uploadsDir, logoFile.name);
-        await fs.promises.writeFile(
-          logoPath,
-          Buffer.from(await logoFile.arrayBuffer())
-        );
+        const buffer = Buffer.from(await logoFile.arrayBuffer());
+        const { url, public_id } = await uploadToCloudinary(buffer, {
+          folder: "wedding-mahaal/finance/logos",
+          fileName: logoFile.name,
+        });
 
         logoData = {
-          url: `/assets/images/finance/logos/${logoFile.name}`,
-          publicId: logoFile.name,
+          url,
+          publicId: public_id,
         };
       } catch (uploadError) {
         console.error("Error handling logo:", uploadError);
@@ -175,7 +163,7 @@ export async function POST(request) {
       if (manualYearActivation) {
         // When manually activating a year, always enable manual control
         existingSettings.manualYearControl = true;
-        
+
         // For manual activation, deactivate all years first
         existingSettings.financialYearHistory.forEach(year => {
           year.isActive = false;
@@ -183,8 +171,8 @@ export async function POST(request) {
 
         // Find and activate the specific year by comparing dates
         const yearToActivate = existingSettings.financialYearHistory.find(
-          y => 
-            new Date(y.startDate).getTime() === startDate.getTime() && 
+          y =>
+            new Date(y.startDate).getTime() === startDate.getTime() &&
             new Date(y.endDate).getTime() === endDate.getTime()
         );
 
@@ -199,9 +187,6 @@ export async function POST(request) {
           throw new Error('Selected financial year not found');
         }
       } else {
-        // Remove duplicate manual control assignment
-        // existingSettings.manualYearControl = manualControl; // Remove this line
-        
         // Rest of normal update logic
         existingSettings.financialYearHistory.forEach(year => {
           year.isActive = false;
@@ -236,7 +221,7 @@ export async function POST(request) {
 
       // Save changes
       await existingSettings.save();
-      
+
       // Verify the save
       const savedSettings = await FinanceSettingsModel.findById(existingSettings._id);
       console.log('Verified manual control status:', savedSettings.manualYearControl);

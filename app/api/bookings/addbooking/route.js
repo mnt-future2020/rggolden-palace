@@ -10,9 +10,8 @@ import { getHotelDatabase } from "../../../../utils/config/hotelConnection";
 import { getModel } from "../../../../utils/helpers/getModel";
 import { getUniqueGuestId } from "../../../../utils/helpers/guestIdGenerator";
 
-import fs from "fs/promises";
-import path from "path";
 import Razorpay from "razorpay";
+import { uploadToCloudinary } from "../../../../utils/helpers/cloudinary";
 import {
   sendBookingConfirmationEmail,
   sendBookingNotificationToAdmin,
@@ -385,22 +384,15 @@ export async function POST(request) {
         throw new Error(`File size exceeds the maximum allowed size of 5MB`);
       }
 
-      const uploadsDir = path.join(
-        process.cwd(),
-        "public",
-        "assets",
-        "images",
-        "bookings",
-        "guest_files"
-      );
-      await fs.mkdir(uploadsDir, { recursive: true });
-
-      const filePath = path.join(uploadsDir, file.name);
-      await fs.writeFile(filePath, Buffer.from(await file.arrayBuffer()));
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const { url } = await uploadToCloudinary(buffer, {
+        folder: "wedding-mahaal/bookings/guest_files",
+        fileName: file.name,
+      });
 
       guestData.uploadedFiles.push({
         fileName: file.name,
-        filePath: `/assets/images/bookings/guest_files/${file.name}`,
+        filePath: url,
         uploadDate: new Date(),
       });
     }

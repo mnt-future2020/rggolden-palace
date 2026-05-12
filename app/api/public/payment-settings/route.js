@@ -3,6 +3,9 @@ import { getHotelDatabase } from "../../../../utils/config/hotelConnection";
 import ApiKeySchema from "../../../../utils/model/payementGateway/ApiKeySchema";
 import { getModel } from "../../../../utils/helpers/getModel";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET() {
   try {
     await getHotelDatabase();

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import React, { useState } from 'react';
 import { Input } from "@heroui/input";
 import { Button } from "@heroui/button";
@@ -129,10 +130,14 @@ const General = ({ hasAddPermission, hasEditPermission, hasDeletePermission }) =
               />
               {heroData.image && (
                 <div className="mt-2 relative rounded-lg overflow-hidden">
-                  <img
+                  <Image
                     src={heroData.image}
                     alt="Hero preview"
+                    width={800}
+                    height={200}
+                    sizes="100vw"
                     className="w-full h-[200px] object-cover"
+                    unoptimized
                   />
                 </div>
               )}

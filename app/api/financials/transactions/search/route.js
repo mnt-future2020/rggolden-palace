@@ -3,6 +3,8 @@ import { getHotelDatabase } from "../../../../../utils/config/hotelConnection";
 import { getModel } from "../../../../../utils/helpers/getModel";
 import TransactionSchema from "../../../../../utils/model/financials/transactions/transactionSchema";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);

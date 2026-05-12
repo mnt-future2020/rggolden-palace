@@ -2,8 +2,13 @@ import { NextResponse } from "next/server";
 import { getHotelDatabase } from "../../../utils/config/hotelConnection";
 import Expenses from "../../../utils/model/financials/expenses/expensesSchema";
 import { getModel } from "../../../utils/helpers/getModel";
-import fs from "fs";
-import path from "path";
+import {
+  uploadToCloudinary,
+  deleteFromCloudinary,
+  getPublicIdFromUrl,
+} from "../../../utils/helpers/cloudinary";
+
+export const dynamic = "force-dynamic";
 
 export async function POST(request) {
   try {
@@ -15,24 +20,14 @@ export async function POST(request) {
     const receiptFile = formData.get("receipt");
 
     if (receiptFile && receiptFile.name) {
-      const uploadsDir = path.join(
-        process.cwd(),
-        "public",
-        "assets",
-        "receipts",
-      );
-      if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir, { recursive: true });
-      }
-
-      const receiptPath = path.join(uploadsDir, receiptFile.name);
-      await fs.promises.writeFile(
-        receiptPath,
-        Buffer.from(await receiptFile.arrayBuffer()),
-      );
+      const buffer = Buffer.from(await receiptFile.arrayBuffer());
+      const { url } = await uploadToCloudinary(buffer, {
+        folder: "wedding-mahaal/receipts",
+        fileName: receiptFile.name,
+      });
 
       receiptData = {
-        url: `/assets/receipts/${receiptFile.name}`,
+        url,
         filename: receiptFile.name,
       };
     }
@@ -160,56 +155,37 @@ export async function PUT(request) {
 
     // Handle receipt file
     if (receiptFile && receiptFile.name) {
-      // Delete old receipt file if exists
-      if (existingExpense.receipt?.filename) {
-        const oldFilePath = path.join(
-          process.cwd(),
-          "public",
-          "assets",
-          "receipts",
-          existingExpense.receipt.filename,
-        );
-        if (fs.existsSync(oldFilePath)) {
-          fs.unlinkSync(oldFilePath);
+      // Delete old receipt from Cloudinary if exists
+      if (existingExpense.receipt?.url) {
+        const publicId = getPublicIdFromUrl(existingExpense.receipt.url);
+        if (publicId) {
+          await deleteFromCloudinary(publicId).catch((err) =>
+            console.error("Error deleting old receipt from Cloudinary:", err)
+          );
         }
       }
 
-      // Save new receipt file
-      const uploadsDir = path.join(
-        process.cwd(),
-        "public",
-        "assets",
-        "receipts",
-      );
-      if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir, { recursive: true });
-      }
-
-      const receiptPath = path.join(uploadsDir, receiptFile.name);
-      await fs.promises.writeFile(
-        receiptPath,
-        Buffer.from(await receiptFile.arrayBuffer()),
-      );
+      // Upload new receipt to Cloudinary
+      const buffer = Buffer.from(await receiptFile.arrayBuffer());
+      const { url } = await uploadToCloudinary(buffer, {
+        folder: "wedding-mahaal/receipts",
+        fileName: receiptFile.name,
+      });
 
       receiptData = {
-        url: `/assets/receipts/${receiptFile.name}`,
+        url,
         filename: receiptFile.name,
       };
     } else if (keepExistingReceipt === "true") {
-      // Keep existing receipt if specified
       receiptData = existingExpense.receipt;
     } else {
-      // Delete existing receipt file if not keeping it
-      if (existingExpense.receipt?.filename) {
-        const oldFilePath = path.join(
-          process.cwd(),
-          "public",
-          "assets",
-          "receipts",
-          existingExpense.receipt.filename,
-        );
-        if (fs.existsSync(oldFilePath)) {
-          fs.unlinkSync(oldFilePath);
+      // Delete existing receipt from Cloudinary if not keeping it
+      if (existingExpense.receipt?.url) {
+        const publicId = getPublicIdFromUrl(existingExpense.receipt.url);
+        if (publicId) {
+          await deleteFromCloudinary(publicId).catch((err) =>
+            console.error("Error deleting receipt from Cloudinary:", err)
+          );
         }
       }
     }
@@ -220,7 +196,7 @@ export async function PUT(request) {
       expense: formData.get("expense"),
       description: formData.get("description"),
       date: new Date(formData.get("date")),
-      receipt: receiptData, // This will be null if receipt was deleted
+      receipt: receiptData,
       paymentType: formData.get("paymentType"),
       bank: formData.get("bank"),
       reference: formData.get("reference"),

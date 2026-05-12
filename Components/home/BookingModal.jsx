@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Image from "next/image";
 import { Input, Textarea } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
 import { Button } from "@heroui/button";
@@ -215,9 +216,12 @@ export default function BookingModal({ isOpen, onClose }) {
           paymentSettings.upiQrCode && (
             <div className="flex justify-center">
               <div className="bg-white p-3 rounded-xl border shadow-md">
-                <img
+                <Image
                   src={paymentSettings.upiQrCode}
                   alt="UPI QR"
+                  width={192}
+                  height={192}
+                  sizes="(max-width: 640px) 160px, 192px"
                   className="w-40 h-40 sm:w-48 sm:h-48 object-contain"
                 />
               </div>
@@ -324,10 +328,12 @@ export default function BookingModal({ isOpen, onClose }) {
             <div className="grid md:grid-cols-2 flex-1 overflow-hidden">
               {/* ── Image Panel ── */}
               <div className="relative hidden md:block">
-                <img
+                <Image
                   src="/contact/2.jpg"
                   alt="Wedding ceremony"
-                  className="object-cover w-full h-full"
+                  fill
+                  sizes="50vw"
+                  className="object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
               </div>

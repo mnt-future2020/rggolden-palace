@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { getHotelDatabase } from "../../../utils/config/hotelConnection";
 import { getWebSettings } from "../../../utils/model/webSettings/WebSettingsSchema";
-import { mkdir, writeFile } from "fs/promises";
-import path from "path";
+import { uploadBase64ToCloudinary } from "../../../utils/helpers/cloudinary";
+
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
@@ -26,25 +27,11 @@ export async function POST(request) {
         data.heroSection.image &&
         data.heroSection.image.startsWith("data:image")
       ) {
-        const base64Data = data.heroSection.image.split(";base64,").pop();
-        const imageBuffer = Buffer.from(base64Data, "base64");
-        const fileName = `hero-${Date.now()}.jpg`;
-
-        // Create directory if it doesn't exist
-        const uploadDir = path.join(
-          process.cwd(),
-          "public",
-          "uploads",
-          "web-settings",
-        );
-        await mkdir(uploadDir, { recursive: true });
-
-        // Save image
-        const filePath = path.join(uploadDir, fileName);
-        await writeFile(filePath, imageBuffer);
-
-        // Update image path in data
-        data.heroSection.image = `/uploads/web-settings/${fileName}`;
+        const { url } = await uploadBase64ToCloudinary(data.heroSection.image, {
+          folder: "wedding-mahaal/web-settings",
+          fileName: data.heroSection.title || "hero-section",
+        });
+        data.heroSection.image = url;
       }
 
       settings.heroSections.push(data.heroSection);
@@ -73,25 +60,11 @@ export async function PUT(request) {
           data.heroSection.image &&
           data.heroSection.image.startsWith("data:image")
         ) {
-          const base64Data = data.heroSection.image.split(";base64,").pop();
-          const imageBuffer = Buffer.from(base64Data, "base64");
-          const fileName = `hero-${Date.now()}.jpg`;
-
-          // Create directory if it doesn't exist
-          const uploadDir = path.join(
-            process.cwd(),
-            "public",
-            "uploads",
-            "web-settings",
+          const { url } = await uploadBase64ToCloudinary(
+            data.heroSection.image,
+            { folder: "wedding-mahaal/web-settings", fileName: data.heroSection.title || "hero-section" },
           );
-          await mkdir(uploadDir, { recursive: true });
-
-          // Save image
-          const filePath = path.join(uploadDir, fileName);
-          await writeFile(filePath, imageBuffer);
-
-          // Update image path in data
-          data.heroSection.image = `/uploads/web-settings/${fileName}`;
+          data.heroSection.image = url;
         }
 
         settings.heroSections[index] = {

@@ -2,8 +2,7 @@ import { getHotelDatabase } from "../../../utils/config/hotelConnection";
 import EmployeeSchema from "../../../utils/model/employeeManagement/employeeSchema";
 import { getModel } from "../../../utils/helpers/getModel";
 import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
+import { uploadToCloudinary } from "../../../utils/helpers/cloudinary";
 
 async function generateEmployeeId(EmployeeModel, dateOfHiring) {
   const employees = await EmployeeModel.find().sort({ dateOfHiring: 1 });
@@ -191,61 +190,29 @@ export async function POST(request) {
       weekOff: formData.get("weekOff"),
     };
 
-    // Handle avatar upload
+    // Handle avatar upload to Cloudinary
     const avatar = formData.get("avatar");
     if (avatar && avatar.size > 0) {
-      const avatarPath = path.join(
-        process.cwd(),
-        "public",
-        "assets",
-        "images",
-        "employees",
-        "avatars",
-        avatar.name
-      );
-      const uploadsDir = path.join(
-        process.cwd(),
-        "public",
-        "assets",
-        "images",
-        "employees",
-        "avatars"
-      );
-      if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir, { recursive: true });
-      }
-      await fs.promises.writeFile(
-        avatarPath,
-        Buffer.from(await avatar.arrayBuffer())
-      );
-      employeeData.avatar = `/assets/images/employees/avatars/${avatar.name}`;
+      const buffer = Buffer.from(await avatar.arrayBuffer());
+      const { url } = await uploadToCloudinary(buffer, {
+        folder: "wedding-mahaal/employees/avatars",
+        fileName: avatar.name,
+      });
+      employeeData.avatar = url;
     }
 
-    // Handle document uploads
+    // Handle document uploads to Cloudinary
     const documents = formData.getAll("documents");
     if (documents.length > 0) {
       employeeData.documents = [];
-      const documentsDir = path.join(
-        process.cwd(),
-        "public",
-        "assets",
-        "images",
-        "employees",
-        "documents"
-      );
-      if (!fs.existsSync(documentsDir)) {
-        fs.mkdirSync(documentsDir, { recursive: true });
-      }
       for (const document of documents) {
         if (document.size > 0) {
-          const documentPath = path.join(documentsDir, document.name);
-          await fs.promises.writeFile(
-            documentPath,
-            Buffer.from(await document.arrayBuffer())
-          );
-          employeeData.documents.push(
-            `/assets/images/employees/documents/${document.name}`
-          );
+          const buffer = Buffer.from(await document.arrayBuffer());
+          const { url } = await uploadToCloudinary(buffer, {
+            folder: "wedding-mahaal/employees/documents",
+            fileName: document.name,
+          });
+          employeeData.documents.push(url);
         }
       }
     }

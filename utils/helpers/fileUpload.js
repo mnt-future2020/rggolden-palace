@@ -1,21 +1,23 @@
-import fs from 'fs';
-import path from 'path';
+import {
+  uploadBase64ToCloudinary,
+  deleteFromCloudinary,
+  getPublicIdFromUrl,
+} from "./cloudinary";
 
-export const deleteFile = (logoPath) => {
+export const deleteFile = async (logoUrl) => {
   try {
-    if (!logoPath) return;
-    
-    const filePath = path.join(process.cwd(), 'public', logoPath);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-      console.log('Old logo deleted successfully:', logoPath);
+    if (!logoUrl) return false;
+    const publicId = getPublicIdFromUrl(logoUrl);
+    if (publicId) {
+      await deleteFromCloudinary(publicId);
+      console.log("Old logo deleted from Cloudinary:", publicId);
       return true;
     }
+    return false;
   } catch (error) {
-    console.error('Error deleting old logo:', error);
+    console.error("Error deleting old logo:", error);
     throw error;
   }
-  return false;
 };
 
 export const saveFile = async (base64Data, hotelDb, oldLogoPath) => {
@@ -25,33 +27,16 @@ export const saveFile = async (base64Data, hotelDb, oldLogoPath) => {
       await deleteFile(oldLogoPath);
     }
 
-    // Extract mime type and base64 content
-    const matches = base64Data.match(/^data:(.+);base64,(.+)$/);
-    if (!matches) throw new Error('Invalid base64 string');
+    // Upload to Cloudinary
+    const { url } = await uploadBase64ToCloudinary(base64Data, {
+      folder: "wedding-mahaal/logos",
+      fileName: "hotel-logo",
+    });
 
-    const [, mimeType, content] = matches;
-    const extension = mimeType.split('/')[1];
-    
-    // Create filename
-    const filename = `logo-${hotelDb}-${Date.now()}.${extension}`;
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-    
-    // Ensure directory exists
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
-    // Save new file
-    const filePath = path.join(uploadDir, filename);
-    const buffer = Buffer.from(content, 'base64');
-    fs.writeFileSync(filePath, buffer);
-    
-    console.log('New logo saved successfully:', filename);
-    
-    // Return the public URL path
-    return `/uploads/${filename}`;
+    console.log("New logo saved to Cloudinary:", url);
+    return url;
   } catch (error) {
-    console.error('Error saving file:', error);
+    console.error("Error saving file:", error);
     throw error;
   }
 };

@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Image from "next/image";
 import { Input, Textarea } from "@heroui/input";
 import { Select, SelectItem } from "@heroui/select";
 import { Button } from "@heroui/button";
@@ -185,9 +186,12 @@ const ContactForm = () => {
           paymentSettings.upiQrCode && (
             <div className="flex justify-center">
               <div className="bg-white p-4 rounded-[2.5rem] shadow-2xl ring-12 ring-white/5">
-                <img
+                <Image
                   src={paymentSettings.upiQrCode}
                   alt="QR"
+                  width={192}
+                  height={192}
+                  sizes="(max-width: 640px) 160px, 192px"
                   className="w-40 h-40 sm:w-48 sm:h-48 object-contain"
                 />
               </div>

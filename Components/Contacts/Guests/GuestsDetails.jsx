@@ -1256,7 +1256,7 @@ export default function GuestProfile({ guestId }) {
                         <a
                           href={
                             file.fileUrl ||
-                            `/assets/images/booking/guest_files/${file.fileName}`
+                            file.filePath || "#"
                           }
                           download
                           className="text-blue-600 hover:text-blue-800"
@@ -1290,7 +1290,7 @@ export default function GuestProfile({ guestId }) {
                   <a
                     href={
                       file.fileUrl ||
-                      `/assets/images/booking/guest_files/${file.fileName}`
+                      file.filePath || "#"
                     }
                     download
                     className="cursor-pointer"

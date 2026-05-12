@@ -99,14 +99,14 @@ export default function ForgotPassword() {
           <div className="flex h-full flex-col items-center justify-center px-8 text-center text-white">
             {hotelLogo && (
               <div className="absolute top-12 left-1/2 -translate-x-1/2">
-                <div className="relative w-28 h-28">
+                <div className="relative w-40 h-40">
                   <Image
                     src={hotelLogo}
                     alt="Hotel Logo"
                     fill
-                    sizes="(max-width: 768px) 96px, 112px"
+                    sizes="160px"
                     priority
-                    className="object-contain drop-shadow-2xl filter brightness-0 invert opacity-90"
+                    className="object-contain drop-shadow-2xl"
                   />
                 </div>
               </div>

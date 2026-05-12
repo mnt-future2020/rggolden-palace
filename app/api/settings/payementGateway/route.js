@@ -3,8 +3,7 @@ import { getHotelDatabase } from "../../../../utils/config/hotelConnection";
 import { connectRazorpay } from "../../../../utils/config/connectRazorpay";
 import ApiKeySchema from "../../../../utils/model/payementGateway/ApiKeySchema";
 import { getModel } from "../../../../utils/helpers/getModel";
-import fs from "fs";
-import path from "path";
+import { uploadToCloudinary } from "../../../../utils/helpers/cloudinary";
 
 export async function GET() {
   try {
@@ -119,34 +118,12 @@ export async function POST(request) {
       upiQrCodeFile instanceof File &&
       upiQrCodeFile.size > 0
     ) {
-      const timestamp = Date.now();
-
-      // Sanitize filename
-      const originalName = upiQrCodeFile.name;
-      const [name, extension] = originalName.split(/\.(?=[^.]+$)/);
-      const sanitizedName = name.replace(/\s+/g, "");
-      const fileName = `${timestamp}-${sanitizedName}.${extension}`;
-
-      const uploadDir = path.join(
-        process.cwd(),
-        "public",
-        "assets",
-        "images",
-        "settings",
-        "payment",
-      );
-
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
-      }
-
-      const filePath = path.join(uploadDir, fileName);
-      await fs.promises.writeFile(
-        filePath,
-        Buffer.from(await upiQrCodeFile.arrayBuffer()),
-      );
-
-      finalQrCodePath = `/assets/images/settings/payment/${fileName}`;
+      const buffer = Buffer.from(await upiQrCodeFile.arrayBuffer());
+      const { url } = await uploadToCloudinary(buffer, {
+        folder: "wedding-mahaal/settings/payment",
+        fileName: upiQrCodeFile.name,
+      });
+      finalQrCodePath = url;
     }
 
     // Validate that QR code exists if upiQrCode method is selected

@@ -35,10 +35,13 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "**",
+        hostname: "res.cloudinary.com",
+      },
+      {
+        protocol: "https",
+        hostname: "rggoldenpalace.com",
       },
     ],
-    domains: ["rggoldenpalace.com"],
     unoptimized: true,
   },
 

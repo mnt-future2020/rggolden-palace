@@ -4,8 +4,7 @@ import Room from "../../../utils/model/room/roomSchema";
 import RoomSettings from "../../../utils/model/settings/room/roomSettingsSchema";
 import { getHotelDatabase } from "../../../utils/config/hotelConnection";
 import { getModel } from "../../../utils/helpers/getModel";
-import fs from "fs";
-import path from "path";
+import { uploadToCloudinary } from "../../../utils/helpers/cloudinary";
 
 async function updateRoomStatuses(RoomModel, GuestModel) {
   const now = new Date();
@@ -166,7 +165,6 @@ export async function POST(request) {
       price: parseFloat(formData.get("price")),
       size: formData.get("size"),
       type: type,
-      // ...existing image handling code...
     };
 
     if (type === "hall") {
@@ -190,46 +188,16 @@ export async function POST(request) {
       return { icon, name };
     });
 
-    // Function to sanitize filename
-    const sanitizeFileName = (originalFileName) => {
-      // Split the filename into name and extension.
-      const [name, extension] = originalFileName.split(/\.(?=[^.]+$)/);
-      // Remove all spaces from the name.
-      const sanitizedName = name.replace(/\s+/g, "");
-
-      return `${sanitizedName}.${extension}`;
-    };
-
     // Handle main image
     const mainImageFile = formData.get("mainImage");
     let mainImageUrl = null;
     if (mainImageFile) {
-      const sanitizedMainImageName = sanitizeFileName(mainImageFile.name);
-      const mainImagePath = path.join(
-        process.cwd(),
-        "public",
-        "assets",
-        "images",
-        "rooms",
-        "mainimage",
-        sanitizedMainImageName
-      );
-      const uploadsDir = path.join(
-        process.cwd(),
-        "public",
-        "assets",
-        "images",
-        "rooms",
-        "mainimage"
-      );
-      if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir, { recursive: true });
-      }
-      await fs.promises.writeFile(
-        mainImagePath,
-        Buffer.from(await mainImageFile.arrayBuffer())
-      );
-      mainImageUrl = `/assets/images/rooms/mainimage/${sanitizedMainImageName}`;
+      const buffer = Buffer.from(await mainImageFile.arrayBuffer());
+      const { url } = await uploadToCloudinary(buffer, {
+        folder: "wedding-mahaal/rooms/mainimage",
+        fileName: mainImageFile.name,
+      });
+      mainImageUrl = url;
     }
 
     // Handle thumbnail images
@@ -237,34 +205,12 @@ export async function POST(request) {
     const thumbnailImageUrls = [];
     for (const thumbnailFile of thumbnailFiles) {
       if (!thumbnailFile.name) continue;
-      const sanitizedThumbnailName = sanitizeFileName(thumbnailFile.name);
-      const thumbnailPath = path.join(
-        process.cwd(),
-        "public",
-        "assets",
-        "images",
-        "rooms",
-        "thumbnailimages",
-        sanitizedThumbnailName
-      );
-      const uploadsDir = path.join(
-        process.cwd(),
-        "public",
-        "assets",
-        "images",
-        "rooms",
-        "thumbnailimages"
-      );
-      if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir, { recursive: true });
-      }
-      await fs.promises.writeFile(
-        thumbnailPath,
-        Buffer.from(await thumbnailFile.arrayBuffer())
-      );
-      thumbnailImageUrls.push(
-        `/assets/images/rooms/thumbnailimages/${sanitizedThumbnailName}`
-      );
+      const buffer = Buffer.from(await thumbnailFile.arrayBuffer());
+      const { url } = await uploadToCloudinary(buffer, {
+        folder: "wedding-mahaal/rooms/thumbnailimages",
+        fileName: thumbnailFile.name,
+      });
+      thumbnailImageUrls.push(url);
     }
 
     const newRoom = new RoomModel({

@@ -1,15 +1,9 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
 import { getHotelDatabase } from "@/utils/config/hotelConnection";
 import { getModel } from "@/utils/helpers/getModel";
 import GuestInfo from "@/utils/model/contacts/guestInfoListSchema";
 import { getUniqueGuestId } from "@/utils/helpers/guestIdGenerator";
-
-const UPLOAD_DIR = path.join(
-  process.cwd(),
-  "public/assets/images/guestinfoList"
-);
+import { uploadToCloudinary } from "@/utils/helpers/cloudinary";
 
 export async function POST(request) {
   try {
@@ -38,28 +32,23 @@ export async function POST(request) {
       updatedAt: new Date(),
     };
 
-    // Process files and create uploadedFiles array
+    // Process files and upload to Cloudinary
     const newUploadedFiles = [];
     const files = formData.getAll("files");
     if (files?.length > 0) {
-      await mkdir(UPLOAD_DIR, { recursive: true });
-
       for (const file of files) {
         if (!file.name) continue;
 
         const buffer = Buffer.from(await file.arrayBuffer());
-        const fileName = `${guestId}-${Date.now()}-${file.name.replace(
-          /[^a-zA-Z0-9.-]/g,
-          "_"
-        )}`;
-        const filePath = path.join(UPLOAD_DIR, fileName);
-
-        await writeFile(filePath, buffer);
+        const { url } = await uploadToCloudinary(buffer, {
+          folder: "wedding-mahaal/guests",
+          fileName: file.name,
+        });
 
         newUploadedFiles.push({
-          fileName,
+          fileName: file.name,
           fileType: file.type,
-          fileUrl: `/assets/images/guestinfoList/${fileName}`,
+          fileUrl: url,
           uploadDate: new Date(),
         });
       }

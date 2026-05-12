@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import axios from "axios";
 import BookingModal from "./BookingModal";
 
@@ -26,11 +27,13 @@ function VenueCard({
 
   return (
     <div className="border border-gray-200 rounded-md overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
-      <div className="h-48 md:h-56 overflow-hidden">
-        <img
+      <div className="h-48 md:h-56 overflow-hidden relative">
+        <Image
           src={mainImage}
           alt={name}
-          className="w-full h-full object-cover"
+          fill
+          sizes="(max-width: 768px) 100vw, 50vw"
+          className="object-cover"
         />
       </div>
       <div className="p-4">

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import connectDb from "@/utils/config/connectDB";
 import LogBook from "@/utils/model/logBook/logBookSchema";
 
-// export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 // GET handler to fetch all log entries
 export async function GET(request) {

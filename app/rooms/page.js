@@ -1,5 +1,4 @@
 import axios from "axios";
-import { headers } from "next/headers";
 import OnlineRoomBooking from "../../Components/OnlineRoomBooking/OnlineRoomBooking";
 import Facilities from "../../Components/home/Facilities";
 import ExtraService from "../../Components/home/ExtraService";
@@ -13,10 +12,7 @@ export const metadata = {
 };
 
 async function getRoomData() {
-  const headersList = headers();
-  const host = headersList.get("host");
-  const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
-  const baseUrl = `${protocol}://${host}`;
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || `http://localhost:3000`;
 
   try {
     const roomsResponse = await axios.get(`${baseUrl}/api/rooms`, {

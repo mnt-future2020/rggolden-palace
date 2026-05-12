@@ -1,3 +1,4 @@
+import Image from "next/image";
 import React, { useEffect, useState } from 'react';
 import { FiTrash2 } from 'react-icons/fi';
 import axios from 'axios';
@@ -61,14 +62,12 @@ const GalleryTable = () => {
               className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200"
             >
               <div className="relative aspect-w-16 aspect-h-9">
-                <img
+                <Image
                   src={image.url}
                   alt={image.name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.target.src = '/placeholder-image.jpg';
-                  }}
-                  loading="lazy"
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                  className="object-cover"
                 />
                 {hasDeletePermission && (
                   <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 transition-opacity duration-200 flex items-center justify-center opacity-0 hover:opacity-100">

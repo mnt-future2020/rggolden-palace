@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { Button } from "@heroui/button";
@@ -279,10 +280,13 @@ export default function RazorPayConfig() {
                     {upiQrCode && (
                       <div className="mt-2 text-center border p-2 rounded">
                         <p className="text-sm text-gray-500 mb-1">Preview:</p>
-                        <img
+                        <Image
                           src={upiQrCode}
                           alt="UPI QR Code"
+                          width={192}
+                          height={192}
                           className="max-h-48 max-w-full object-contain mx-auto"
+                          unoptimized
                         />
                       </div>
                     )}

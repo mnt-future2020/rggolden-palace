@@ -519,9 +519,11 @@ export default function AddAndEditProfile({ params }) {
           <div className="flex justify-center mb-6 2xl:w-[84%]">
             <div className="relative inline-block">
               <Avatar
+                key={avatarSrc || "default"}
                 src={
                   avatarSrc || "https://i.pravatar.cc/150?u=a092581d4ef9026700d"
                 }
+                imgProps={{ referrerPolicy: "no-referrer" }}
                 className="w-24 h-24 mx-auto"
                 onClick={triggerAvatarUpload}
                 role="button"

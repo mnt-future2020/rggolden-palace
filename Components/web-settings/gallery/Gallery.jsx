@@ -1,3 +1,4 @@
+import Image from "next/image";
 import React, { useState } from "react";
 import { Form, ProgressBar, Row, Col } from "react-bootstrap";
 import {
@@ -242,10 +243,13 @@ const Gallery = ({ hasAddPermission, hasEditPermission, hasDeletePermission }) =
                   <Col key={file.preview} xs={12} sm={6} md={4} lg={3}>
                     <div className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300">
                       <div className="relative">
-                        <img
+                        <Image
                           src={file.preview}
                           alt={`Preview ${index}`}
+                          width={400}
+                          height={192}
                           className="w-100 h-48 object-cover"
+                          unoptimized
                         />
                         <button
                           onClick={() => removeFile(file.preview)}

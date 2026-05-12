@@ -50,7 +50,6 @@ export async function POST(request: Request) {
         });
         await newUserEmployee.save();
 
-        console.log(`Password for ${email}: ${password}`);
 
         // Send email with the generated password
         const subject = "Your New Account Details";

@@ -6,7 +6,6 @@ import { getModel } from "../../../utils/helpers/getModel";
 
 export const dynamic = "force-dynamic";
 
-const PUBLIC_FILE_PATH = "/assets/images/guestinfoList/";
 
 export async function GET(request) {
   try {
@@ -33,11 +32,11 @@ export async function GET(request) {
         );
       }
 
-      // Transform file URLs in the guest info
+      // Ensure file URLs are present
       if (guestInfo.uploadedFiles) {
         guestInfo.uploadedFiles = guestInfo.uploadedFiles.map((file) => ({
           ...file,
-          fileUrl: file.fileUrl ? PUBLIC_FILE_PATH + file.fileName : null,
+          fileUrl: file.fileUrl || null,
         }));
       }
 
@@ -59,11 +58,11 @@ export async function GET(request) {
     const existingGuests = await GuestInfoModel.find({}).lean();
     const existingGuestMap = new Map(
       existingGuests.map((guest) => {
-        // Transform file URLs for each guest
+        // Ensure file URLs are present
         if (guest.uploadedFiles) {
           guest.uploadedFiles = guest.uploadedFiles.map((file) => ({
             ...file,
-            fileUrl: file.fileUrl ? PUBLIC_FILE_PATH + file.fileName : null,
+            fileUrl: file.fileUrl || null,
           }));
         }
         return [guest.guestId, guest];
@@ -108,7 +107,7 @@ export async function GET(request) {
           const transformedFiles = bookingFiles.map((file) => ({
             fileName: file.fileName || "",
             fileType: file.fileType || "",
-            fileUrl: PUBLIC_FILE_PATH + file.fileName,
+            fileUrl: file.fileUrl || file.filePath || null,
             uploadDate: file.uploadDate || new Date(),
           }));
 

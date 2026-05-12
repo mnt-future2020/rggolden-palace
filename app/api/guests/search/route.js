@@ -3,6 +3,8 @@ import { getHotelDatabase } from "../../../../utils/config/hotelConnection";
 import GuestInfo from "../../../../utils/model/contacts/guestInfoListSchema";
 import { getModel } from "../../../../utils/helpers/getModel";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request) {
   try {
     const searchParams = new URL(request.url).searchParams;
@@ -38,11 +40,11 @@ export async function GET(request) {
       );
     }
 
-    // Transform file URLs for consistency
+    // Ensure file URLs are present
     if (guest.uploadedFiles) {
       guest.uploadedFiles = guest.uploadedFiles.map((file) => ({
         ...file,
-        fileUrl: `/assets/images/guestinfoList/${file.fileName}`,
+        fileUrl: file.fileUrl || null,
       }));
     }
 

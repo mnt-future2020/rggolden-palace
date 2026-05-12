@@ -6,6 +6,8 @@ import RoomSettings from "../../../../utils/model/settings/room/roomSettingsSche
 import { getModel } from "../../../../utils/helpers/getModel";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request) {
   try {
     await getHotelDatabase();

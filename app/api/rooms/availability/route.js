@@ -3,6 +3,8 @@ import { getHotelDatabase } from "../../../../utils/config/hotelConnection";
 import { getModel } from "../../../../utils/helpers/getModel";
 import RoomAvailabilitySchema from "../../../../utils/model/room/roomAvailabilitySchema";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request) {
   try {
     await getHotelDatabase();

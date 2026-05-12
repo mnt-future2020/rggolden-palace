@@ -27,6 +27,12 @@ const publicRoutes = [
   "/privacy-policy",
   "/api/crm", // Add this line
   "/api/public/payment-settings",
+  "/rooms",
+  "/hall",
+  "/gallery",
+  "/contact",
+  "/payment-policy",
+  "/policies",
   // Add other frontend API routes as needed
 ];
 
