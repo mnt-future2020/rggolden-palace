@@ -912,9 +912,7 @@ export default function AddGuest() {
       newErrors.verificationType = "Please select a verification type";
     }
 
-    if (verificationType === "aadhar" && !formData.aadharNumber) {
-      newErrors.aadharNumber = "Aadhar number is required";
-    }
+    // Aadhar number is optional — no validation required
 
     if (verificationType === "passport" && !formData.passportNumber) {
       newErrors.passportNumber = "Passport number is required";
