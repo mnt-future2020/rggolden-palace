@@ -908,15 +908,9 @@ export default function AddGuest() {
       newErrors.propertyType = "Please select a property type";
     }
 
-    if (!verificationType) {
-      newErrors.verificationType = "Please select a verification type";
-    }
+    // Verification ID and Aadhar number are optional — no validation required
 
-    // Aadhar number is optional — no validation required
 
-    if (verificationType === "passport" && !formData.passportNumber) {
-      newErrors.passportNumber = "Passport number is required";
-    }
 
     if (selectedRooms.some((room) => !room.type || !room.number)) {
       newErrors.rooms = `Please select all ${
@@ -1461,13 +1455,13 @@ export default function AddGuest() {
                     {errors.nationality}
                   </Form.Control.Feedback>
                 </Col>
+                {/* Verification ID and number fields commented out
                 <Col md={6}>
                   <Form.Label>Verification Id</Form.Label>
                   <Form.Select
                     value={verificationType || ""}
                     onChange={handleSelectChange}
                     isInvalid={!!errors.verificationType}
-                    required
                   >
                     <option value="">Select Verification ID</option>
                     <option value="aadhar">Aadhar Number</option>
@@ -1503,13 +1497,13 @@ export default function AddGuest() {
                       onChange={handleInputChange}
                       placeholder="Enter your Passport number"
                       isInvalid={!!errors.passportNumber}
-                      required
                     />
                     <Form.Control.Feedback type="invalid">
                       {errors.passportNumber}
                     </Form.Control.Feedback>
                   </Col>
                 )}
+                */}
                 <Col md={12}>
                   <Form.Label>Address</Form.Label>
                   <Form.Control

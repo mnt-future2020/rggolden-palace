@@ -325,21 +325,11 @@ export default function EditGuestBooking({ params }) {
       }
     });
 
-    // Additional custom validations
-    if (!verificationType) {
-      newErrors.verificationType = "Please select a verification type";
-    }
+    // Verification ID and Aadhar number are optional — no validation required
 
 
 
-    if (verificationType === "passport" && !formData.passportNumber) {
-      newErrors.passportNumber = "Passport number is required";
-    } else if (
-      verificationType === "passport" &&
-      !/^[A-Z0-9]{8,}$/.test(formData.passportNumber)
-    ) {
-      newErrors.passportNumber = "Invalid passport number format";
-    }
+
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -654,14 +644,14 @@ export default function EditGuestBooking({ params }) {
                   </Form.Control.Feedback>
                 </Form.Group>
               </Col>
+              {/* Verification ID and number fields commented out
               <Col md={6}>
                 <Form.Group controlId="verificationDetails">
-                  <Form.Label>Verification ID *</Form.Label>
+                  <Form.Label>Verification ID</Form.Label>
                   <Form.Select
                     value={verificationType || ""}
                     onChange={handleSelectChange}
                     isInvalid={!!errors.verificationType}
-                    required
                   >
                     <option value="" key="empty">
                       Select Verification ID
@@ -699,7 +689,7 @@ export default function EditGuestBooking({ params }) {
               {verificationType === "passport" && (
                 <Col md={6}>
                   <Form.Group controlId="passportNumber">
-                    <Form.Label>Enter Passport Number *</Form.Label>
+                    <Form.Label>Enter Passport Number</Form.Label>
                     <Form.Control
                       type="text"
                       name="passportNumber"
@@ -707,7 +697,6 @@ export default function EditGuestBooking({ params }) {
                       onChange={handleInputChange}
                       placeholder="Enter your Passport number"
                       isInvalid={!!errors.passportNumber}
-                      required
                     />
                     <Form.Control.Feedback type="invalid">
                       {errors.passportNumber}
@@ -715,6 +704,7 @@ export default function EditGuestBooking({ params }) {
                   </Form.Group>
                 </Col>
               )}
+              */}
               <Col md={12}>
                 <Form.Group controlId="address">
                   <Form.Label>Address *</Form.Label>

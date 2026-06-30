@@ -35,10 +35,7 @@ export const validationRules = {
     message: {}
   },
   passportNumber: {
-    pattern: /^[A-Z0-9]{8,}$/,
-    message: {
-      pattern: "Please enter a valid passport number"
-    }
+    message: {}
   }
 };
 
