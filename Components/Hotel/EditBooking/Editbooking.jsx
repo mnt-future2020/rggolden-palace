@@ -338,6 +338,7 @@ export default function EditGuestBooking({ params }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) {
+      toast.error("Please fill in all required fields before submitting.");
       return;
     }
 

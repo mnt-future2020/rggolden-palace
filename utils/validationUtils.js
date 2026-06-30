@@ -21,7 +21,10 @@ export const validationRules = {
   },
   email: {
     required: false,
-    message: {}
+    pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    message: {
+      pattern: "Please enter a valid email address"
+    }
   },
   mobileNo: {
     required: true,
