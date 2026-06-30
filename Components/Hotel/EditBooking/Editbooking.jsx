@@ -312,9 +312,7 @@ export default function EditGuestBooking({ params }) {
   const validateForm = () => {
     const newErrors = {};
 
-    // Validate all fields using validation rules
     Object.keys(formData).forEach((field) => {
-      // Skip mobile number validation if it hasn't been modified
       if (field === "mobileNo" && !modifiedFields.mobileNo) {
         return;
       }
@@ -325,20 +323,40 @@ export default function EditGuestBooking({ params }) {
       }
     });
 
-    // Verification ID and Aadhar number are optional — no validation required
-
-
-
-
-
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+
+    if (Object.keys(newErrors).length > 0) {
+      const fieldLabels = {
+        firstName: "First Name",
+        lastName: "Last Name",
+        mobileNo: "Mobile No",
+        gender: "Gender",
+        dateOfBirth: "Date of Birth",
+        email: "Email",
+        address: "Address",
+      };
+      const missingFields = Object.keys(newErrors)
+        .map((key) => fieldLabels[key] || key)
+        .join(", ");
+      toast.error(`Please fill: ${missingFields}`);
+
+      setTimeout(() => {
+        const firstErrorEl = document.querySelector(".is-invalid");
+        if (firstErrorEl) {
+          firstErrorEl.scrollIntoView({ behavior: "smooth", block: "center" });
+          firstErrorEl.focus();
+        }
+      }, 100);
+
+      return false;
+    }
+
+    return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) {
-      toast.error("Please fill in all required fields before submitting.");
       return;
     }
 

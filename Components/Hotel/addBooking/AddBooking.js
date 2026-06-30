@@ -908,10 +908,6 @@ export default function AddGuest() {
       newErrors.propertyType = "Please select a property type";
     }
 
-    // Verification ID and Aadhar number are optional — no validation required
-
-
-
     if (selectedRooms.some((room) => !room.type || !room.number)) {
       newErrors.rooms = `Please select all ${
         propertyType === "hall" ? "hall" : "room"
@@ -922,7 +918,6 @@ export default function AddGuest() {
       newErrors.dateRange = "Please select check-in and check-out dates";
     }
 
-    // Add validation for hall-specific fields
     if (propertyType === "hall") {
       if (!eventType) {
         newErrors.eventType = "Please select an event type";
@@ -931,18 +926,42 @@ export default function AddGuest() {
       if (!timeSlot.name) {
         newErrors.timeSlot = "Please select a time slot";
       }
-
-      // Optional validation for groom/bride details if needed
-      // These can be optional or required based on your business logic
-      /*
-      if (!groomDetails.name && !brideDetails.name) {
-        newErrors.contactDetails = "Please provide at least one of groom or bride details";
-      }
-      */
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+
+    if (Object.keys(newErrors).length > 0) {
+      const fieldLabels = {
+        firstName: "First Name",
+        lastName: "Last Name",
+        mobileNo: "Mobile No",
+        gender: "Gender",
+        dateOfBirth: "Date of Birth",
+        email: "Email",
+        address: "Address",
+        propertyType: "Property Type",
+        rooms: propertyType === "hall" ? "Hall" : "Room",
+        dateRange: "Date Range",
+        eventType: "Event",
+        timeSlot: "Time Slot",
+      };
+      const missingFields = Object.keys(newErrors)
+        .map((key) => fieldLabels[key] || key)
+        .join(", ");
+      toast.error(`Please fill: ${missingFields}`);
+
+      setTimeout(() => {
+        const firstErrorEl = document.querySelector(".is-invalid");
+        if (firstErrorEl) {
+          firstErrorEl.scrollIntoView({ behavior: "smooth", block: "center" });
+          firstErrorEl.focus();
+        }
+      }, 100);
+
+      return false;
+    }
+
+    return true;
   };
 
   const verifyCurrentAvailability = async (
@@ -1025,7 +1044,6 @@ export default function AddGuest() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) {
-      toast.error("Please fill in all required fields before submitting.");
       return;
     }
 
