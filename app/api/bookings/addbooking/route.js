@@ -323,7 +323,6 @@ export async function POST(request) {
       "bookingNumber",
       "firstName",
       "lastName",
-      "email",
       "checkInDate",
       "checkOutDate",
       "paymentMethod",

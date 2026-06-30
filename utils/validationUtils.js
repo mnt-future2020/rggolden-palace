@@ -21,10 +21,7 @@ export const validationRules = {
   },
   email: {
     required: false,
-    pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-    message: {
-      pattern: "Please enter a valid email address"
-    }
+    message: {}
   },
   mobileNo: {
     required: true,
@@ -35,10 +32,7 @@ export const validationRules = {
     }
   },
   aadharNumber: {
-    pattern: /^[0-9]{12}$/,
-    message: {
-      pattern: "Please enter a valid 12-digit Aadhar number"
-    }
+    message: {}
   },
   passportNumber: {
     pattern: /^[A-Z0-9]{8,}$/,

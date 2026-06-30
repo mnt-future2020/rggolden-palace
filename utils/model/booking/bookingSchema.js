@@ -33,7 +33,6 @@ const GuestSchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      required: true,
     },
     nationality: {
       type: String,

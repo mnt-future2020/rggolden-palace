@@ -330,14 +330,7 @@ export default function EditGuestBooking({ params }) {
       newErrors.verificationType = "Please select a verification type";
     }
 
-    // Aadhar number is optional — only validate format if provided
-    if (
-      verificationType === "aadhar" &&
-      formData.aadharNumber &&
-      !/^\d{12}$/.test(formData.aadharNumber)
-    ) {
-      newErrors.aadharNumber = "Aadhar number must be 12 digits";
-    }
+
 
     if (verificationType === "passport" && !formData.passportNumber) {
       newErrors.passportNumber = "Passport number is required";
