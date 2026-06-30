@@ -1432,7 +1432,6 @@ export default function AddGuest() {
                     onChange={handleInputChange}
                     placeholder="Enter email address"
                     isInvalid={!!errors.email}
-                    required
                   />
                   <Form.Control.Feedback type="invalid">
                     {errors.email}
