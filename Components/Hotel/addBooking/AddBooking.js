@@ -1488,7 +1488,6 @@ export default function AddGuest() {
                       onChange={handleInputChange}
                       placeholder="Enter your Aadhar number"
                       isInvalid={!!errors.aadharNumber}
-                      required
                     />
                     <Form.Control.Feedback type="invalid">
                       {errors.aadharNumber}

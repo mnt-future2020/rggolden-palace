@@ -689,7 +689,7 @@ export default function EditGuestBooking({ params }) {
               {verificationType === "aadhar" && (
                 <Col md={6}>
                   <Form.Group controlId="aadharNumber">
-                    <Form.Label>Enter Aadhar Number *</Form.Label>
+                    <Form.Label>Enter Aadhar Number</Form.Label>
                     <Form.Control
                       type="number"
                       name="aadharNumber"
@@ -697,7 +697,6 @@ export default function EditGuestBooking({ params }) {
                       onChange={handleInputChange}
                       placeholder="Enter your Aadhar number"
                       isInvalid={!!errors.aadharNumber}
-                      required
                     />
                     <Form.Control.Feedback type="invalid">
                       {errors.aadharNumber}
