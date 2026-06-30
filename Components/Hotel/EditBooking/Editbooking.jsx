@@ -468,7 +468,7 @@ export default function EditGuestBooking({ params }) {
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h1 className="h2 mb-0">Edit Guest</h1>
           </div>
-          <Form onSubmit={handleSubmit}>
+          <Form noValidate onSubmit={handleSubmit}>
             <Row className="g-3">
               <Col md={6}>
                 <Form.Group controlId="firstName">
@@ -480,7 +480,6 @@ export default function EditGuestBooking({ params }) {
                     onChange={handleInputChange}
                     placeholder="Enter first name"
                     isInvalid={!!errors.firstName}
-                    required
                   />
                   <Form.Control.Feedback type="invalid">
                     {errors.firstName}
@@ -497,7 +496,6 @@ export default function EditGuestBooking({ params }) {
                     onChange={handleInputChange}
                     placeholder="Enter last name"
                     isInvalid={!!errors.lastName}
-                    required
                   />
                   <Form.Control.Feedback type="invalid">
                     {errors.lastName}
@@ -513,7 +511,6 @@ export default function EditGuestBooking({ params }) {
                       value={formData.countryCode + formData.mobileNo}
                       onChange={handlePhoneChange}
                       inputProps={{
-                        required: true,
                         placeholder: "Enter mobile number",
                         className: "form-control",
                       }}
@@ -556,7 +553,6 @@ export default function EditGuestBooking({ params }) {
                     value={formData.gender || ""} // Add fallback empty string
                     onChange={handleInputChange}
                     isInvalid={!!errors.gender}
-                    required
                   >
                     <option value="" key="empty-gender">
                       Select gender
@@ -587,7 +583,6 @@ export default function EditGuestBooking({ params }) {
                       onChange={handleInputChange}
                       className="pe-5"
                       isInvalid={!!errors.dateOfBirth}
-                      required
                     />
                     <FaCalendarAlt className="position-absolute top-50 end-0 translate-middle-y me-2 text-muted" />
                     <Form.Control.Feedback type="invalid">
@@ -598,7 +593,7 @@ export default function EditGuestBooking({ params }) {
               </Col>
               <Col md={6}>
                 <Form.Group controlId="email">
-                  <Form.Label>Email *</Form.Label>
+                  <Form.Label>Email</Form.Label>
                   <Form.Control
                     type="email"
                     name="email"
@@ -638,7 +633,6 @@ export default function EditGuestBooking({ params }) {
                     loadOptions={loadCountryOptions}
                     noOptionsMessage={() => "No countries found"}
                     isInvalid={!!errors.nationality}
-                    required
                   />
                   <Form.Control.Feedback type="invalid">
                     {errors.nationality}
@@ -716,7 +710,6 @@ export default function EditGuestBooking({ params }) {
                     onChange={handleInputChange}
                     placeholder="Enter full address"
                     isInvalid={!!errors.address}
-                    required
                   />
                   <Form.Control.Feedback type="invalid">
                     {errors.address}
@@ -842,7 +835,6 @@ export default function EditGuestBooking({ params }) {
                     name="propertyType"
                     value={propertyType}
                     onChange={(e) => setPropertyType(e.target.value)}
-                    required
                   >
                     <option value="room">Room</option>
                     <option value="hall">Hall</option>

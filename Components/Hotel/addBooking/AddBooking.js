@@ -1278,7 +1278,7 @@ export default function AddGuest() {
             <div className="d-flex justify-content-between align-items-center mb-4">
               <h1 className="h2 mb-0">Add Guest</h1>
             </div>
-            <Form onSubmit={handleSubmit}>
+            <Form noValidate onSubmit={handleSubmit}>
               {isAutofilling && (
                 <div className="mb-3 text-blue-600">
                   <Spinner size="sm" className="mr-2" />
@@ -1293,7 +1293,6 @@ export default function AddGuest() {
                       name="propertyType"
                       value={propertyType}
                       onChange={(e) => setPropertyType(e.target.value)}
-                      required
                     >
                       <option value="room">Room</option>
                       <option value="hall">Hall</option>
@@ -1309,7 +1308,6 @@ export default function AddGuest() {
                     onChange={handleInputChange}
                     placeholder="Enter first name"
                     isInvalid={!!errors.firstName}
-                    required
                   />
                   <Form.Control.Feedback type="invalid">
                     {errors.firstName}
@@ -1324,7 +1322,6 @@ export default function AddGuest() {
                     onChange={handleInputChange}
                     placeholder="Enter last name"
                     isInvalid={!!errors.lastName}
-                    required
                   />
                   <Form.Control.Feedback type="invalid">
                     {errors.lastName}
@@ -1341,7 +1338,6 @@ export default function AddGuest() {
                         value={formData.countryCode + formData.mobileNo}
                         onChange={handlePhoneChange}
                         inputProps={{
-                          required: true,
                           placeholder: "Enter mobile number",
                           className: "form-control",
                         }}
@@ -1390,7 +1386,6 @@ export default function AddGuest() {
                     value={formData.gender}
                     onChange={handleInputChange}
                     isInvalid={!!errors.gender}
-                    required
                   >
                     <option value="">Select gender</option>
                     <option value="male">Male</option>
@@ -1411,7 +1406,6 @@ export default function AddGuest() {
                       onChange={handleInputChange}
                       className="pe-5"
                       isInvalid={!!errors.dateOfBirth}
-                      required
                     />
                     <Form.Control.Feedback type="invalid">
                       {errors.dateOfBirth}
@@ -1514,7 +1508,6 @@ export default function AddGuest() {
                     onChange={handleInputChange}
                     placeholder="Enter full address"
                     isInvalid={!!errors.address}
-                    required
                   />
                   <Form.Control.Feedback type="invalid">
                     {errors.address}

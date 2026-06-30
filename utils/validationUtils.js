@@ -34,6 +34,24 @@ export const validationRules = {
       pattern: "Please enter a valid mobile number"
     }
   },
+  gender: {
+    required: true,
+    message: {
+      required: "Gender is required"
+    }
+  },
+  dateOfBirth: {
+    required: true,
+    message: {
+      required: "Date of birth is required"
+    }
+  },
+  address: {
+    required: true,
+    message: {
+      required: "Address is required"
+    }
+  },
   aadharNumber: {
     message: {}
   },
