@@ -1769,6 +1769,7 @@ export default function AddGuest() {
                               setCheckOutTime(selected.toTime);
                             }
                           }}
+                          isInvalid={!!errors.timeSlot}
                         >
                           <option value="">Select Time Slot</option>
                           {availableTimeSlots.map((slot, idx) => (
@@ -1777,6 +1778,9 @@ export default function AddGuest() {
                             </option>
                           ))}
                         </Form.Select>
+                        <Form.Control.Feedback type="invalid">
+                          {errors.timeSlot}
+                        </Form.Control.Feedback>
                       </Form.Group>
                     </Col>
 
@@ -1982,6 +1986,7 @@ export default function AddGuest() {
                         <Form.Select
                           value={eventType}
                           onChange={(e) => setEventType(e.target.value)}
+                          isInvalid={!!errors.eventType}
                         >
                           <option value="">Select Event</option>
                           {eventTypes.map((type, idx) => (
@@ -1990,6 +1995,9 @@ export default function AddGuest() {
                             </option>
                           ))}
                         </Form.Select>
+                        <Form.Control.Feedback type="invalid">
+                          {errors.eventType}
+                        </Form.Control.Feedback>
                       </Form.Group>
                     </Col>
 
